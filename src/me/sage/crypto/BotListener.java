@@ -24,11 +24,10 @@ import okhttp3.Response;
 public class BotListener extends ListenerAdapter {
 	
 	private static OkHttpClient client = new OkHttpClient();
-	private static Color colorr;
 	private static int smallCounter;
 	private static long time, currentTime;
-	private static Gson gson = new Gson();	
-	
+	private static Gson gson = new Gson();
+	private static int errorCount = 0;	
 	public static String getJSON(String url) throws IOException {
 		  Request request = new Request.Builder()
 		      .url(url)
@@ -59,7 +58,7 @@ public class BotListener extends ListenerAdapter {
 		return coinlist;
 	}
 	
-	public static String getCoin(String name) {
+	public static MessageEmbed getCoin(String name) {
 		
 		String json = null;
 		try {
@@ -68,14 +67,27 @@ public class BotListener extends ListenerAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
+		IndividualCoin[] icoin = null;
+		MessageEmbed coinDATA = new EmbedBuilder().setTitle("No such coin found!").setDescription("Are you sure you typed it correctly?").setColor(Color.RED).build();
+		try {
+			icoin = gson.fromJson(json, IndividualCoin[].class); 
 		
-		String coinData = null;
 		
-		IndividualCoin[] icoin = gson.fromJson(json, IndividualCoin[].class); 
+		//coinData =  icoin[0].getName() + "[" + icoin[0].getSymbol() + "]" + ": $" + icoin[0].getPrice_usd();
 		
-		coinData =  icoin[0].getName() + "[" + icoin[0].getSymbol() + "]" + ": $" + icoin[0].getPrice_usd();
+			coinDATA = new EmbedBuilder().setTitle(icoin[0].getName()+"["+ icoin[0].getSymbol() + "]")
+				.setDescription("Price in USD:  $"+icoin[0].getPrice_usd() + "\n" +
+								"Price in BTC:  "+icoin[0].getPrice_btc() + "\n\n" +
+								"Market Cap:  $"+ icoin[0].getMarket_cap_usd() + "\n" +
+								"Percent Change in 1h:  "+icoin[0].getPercent_change_1h())
+				.setColor(Color.ORANGE)
+				.build();
+		} catch (Exception e) {
+			System.out.println("Error occured on line 75");
+			errorCount = 1;
+		}
 		
-		return coinData;
+		return coinDATA;
 		
 	}
 	
@@ -94,7 +106,7 @@ public class BotListener extends ListenerAdapter {
 					e.getChannel().sendMessage(new EmbedBuilder().setTitle("Top 10 Crypto Currency List").setDescription(getUserData(10)).setColor(Color.MAGENTA).setFooter("Source: Coinmarketcap", null).build()).queue();
 					Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
 					time = (timestamp1.getTime()/1000);
-				} else {			
+				} else {
 					String coinName = e.getMessage().getRawContent().substring(7);
 					e.getChannel().sendMessage(getCoin(coinName)).queue();
 					Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
@@ -106,11 +118,8 @@ public class BotListener extends ListenerAdapter {
 		
 		}
 				
-		if(e.getMessage().getRawContent().equals("//help")) {
-			e.getChannel().sendMessage("**Available Command List**\nUse `//<command>` to use a command\n"
-					+ "**1.** `//coin` - `Gets information about the top 10 coins`\n"
-					+ "**2.** `//coin <coinname>` - `Gets info about the specific coin`\n"
-					+ "**3.** `//test` - `something?`\n").queue();
+		if(e.getMessage().getRawContent().equals("//info")) {			
+			e.getChannel().sendMessage(new EmbedBuilder().setTitle("Source Code\n").setDescription("[Github - CryptoAge](https://github.com/rikoudosenin/cryptoage/)").setAuthor("Sage", "https://github.com/rikoudosenin", null).setColor(Color.orange).build()).queue();
 		}
 	}
 	
