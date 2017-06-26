@@ -3,17 +3,12 @@ package me.sage.crypto;
 import java.awt.Color;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-
-import javax.swing.text.StyleContext.SmallAttributeSet;
-
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-
 import me.sage.crypto.coinmarketcap.COINAPI;
 import me.sage.crypto.coinmarketcap.IndividualCoin;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -27,7 +22,10 @@ public class BotListener extends ListenerAdapter {
 	private static int smallCounter;
 	private static long time, currentTime;
 	private static Gson gson = new Gson();
-	private static int errorCount = 0;	
+	private static String coinName = new String();
+	private static String playingNow = new String();
+	private static long author = 271888508728246274L;
+	
 	public static String getJSON(String url) throws IOException {
 		  Request request = new Request.Builder()
 		      .url(url)
@@ -84,7 +82,6 @@ public class BotListener extends ListenerAdapter {
 				.build();
 		} catch (Exception e) {
 			System.out.println("Error occured on line 75");
-			errorCount = 1;
 		}
 		
 		return coinDATA;
@@ -107,7 +104,7 @@ public class BotListener extends ListenerAdapter {
 					Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
 					time = (timestamp1.getTime()/1000);
 				} else {
-					String coinName = e.getMessage().getRawContent().substring(7);
+					coinName = e.getMessage().getRawContent().substring(7);
 					e.getChannel().sendMessage(getCoin(coinName)).queue();
 					Timestamp timestamp1 = new Timestamp(System.currentTimeMillis());
 					time = (timestamp1.getTime()/1000);
@@ -118,9 +115,19 @@ public class BotListener extends ListenerAdapter {
 		
 		}
 				
-		if(e.getMessage().getRawContent().equals("//info")) {			
+		if(e.getMessage().getRawContent().equalsIgnoreCase("//info")) {			
 			e.getChannel().sendMessage(new EmbedBuilder().setTitle("Source Code\n").setDescription("[Github - CryptoAge](https://github.com/rikoudosenin/cryptoage/)").setAuthor("Sage", "https://github.com/rikoudosenin", null).setColor(Color.orange).build()).queue();
 		}
+		
+		if(e.getMessage().getRawContent().startsWith("//playing")) {
+			if(e.getAuthor().getIdLong()==author) {
+				playingNow = e.getMessage().getRawContent().substring(10);
+				e.getJDA().getPresence().setGame(Game.of(playingNow));
+			} else {
+				e.getChannel().sendMessage("You don't tell me what to do.").queue();
+			}
+		}
+		
 	}
 	
 }
