@@ -18,6 +18,7 @@ public class DataFetcher {
 	private static OkHttpClient client = new OkHttpClient();
 	private static Gson gson = new Gson();
 	private static int smallCounter; // TOP 10 List counter
+	private String json;
 
 	public static String getJSON(String url) throws IOException {
 		Request request = new Request.Builder().url(url).build();
@@ -48,7 +49,7 @@ public class DataFetcher {
 
 	public MessageEmbed getCoin(String name) {
 
-		String json = null;
+		json = null;
 
 		try {
 			json = getJSON("https://api.coinmarketcap.com/v1/ticker/" + name);

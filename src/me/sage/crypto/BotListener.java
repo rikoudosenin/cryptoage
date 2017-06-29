@@ -17,6 +17,7 @@ public class BotListener extends ListenerAdapter {
 	private static String playingNow = new String();
 	private static long author = 271888508728246274L;
 	private DataFetcher df = new DataFetcher();
+	private Timestamp timestamp = null;
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent e) {
@@ -26,7 +27,7 @@ public class BotListener extends ListenerAdapter {
 		}
 
 		if (e.getMessage().getRawContent().startsWith(("//coin"))) {
-			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+			timestamp = new Timestamp(System.currentTimeMillis());
 			currentTime = (timestamp.getTime() / 1000);
 			if ((time + 10) < currentTime) {
 				if (e.getMessage().getRawContent().equalsIgnoreCase("//coin")) {
